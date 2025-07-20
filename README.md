@@ -101,6 +101,68 @@ deck.AddCardWithOptions(
 )
 ```
 
+### Adding Images
+
+```go
+// Method 1: Using AddImage helper
+imageData, err := os.ReadFile("diagram.png")
+if err != nil {
+    log.Fatal(err)
+}
+imgTag := deck.AddImage("diagram.png", imageData)
+deck.AddCard("What does this show?", "A diagram " + imgTag)
+
+// Method 2: Using AddCardWithImage convenience method
+deck.AddCardWithImage(
+    "Identify this structure",
+    "The Eiffel Tower",
+    "tower.jpg",
+    imageData,
+)
+
+// Method 3: Using CardOptions for images
+deck.AddCardWithOptions(
+    "Compare these images",
+    "They show before and after",
+    &anki.CardOptions{
+        FrontImage: "before.png",
+        BackImage:  "after.png",
+    },
+)
+```
+
+### Adding Videos
+
+```go
+// Method 1: Using AddVideo helper
+videoData, err := os.ReadFile("demo.mp4")
+if err != nil {
+    log.Fatal(err)
+}
+videoTag := deck.AddVideo("demo.mp4", videoData)
+deck.AddCard("Watch this technique", "Explanation: " + videoTag)
+
+// Method 2: Using AddCardWithVideo convenience method
+deck.AddCardWithVideo(
+    "What's happening in this video?",
+    "A chemical reaction",
+    "reaction.webm",
+    videoData,
+)
+
+// Method 3: Multimedia card with all media types
+deck.AddCardWithOptions(
+    "Study this content",
+    "Complete explanation",
+    &anki.CardOptions{
+        Tags:       []string{"multimedia"},
+        FrontImage: "slide.png",
+        FrontAudio: "narration.mp3",
+        BackVideo:  "animation.mp4",
+    },
+)
+```
+
 ### Custom Templates
 
 ```go
@@ -148,6 +210,10 @@ Options for adding cards:
 - `Tags []string` - Tags to associate with the card
 - `FrontAudio string` - Audio filename to play on the front of the card
 - `BackAudio string` - Audio filename to play on the back of the card
+- `FrontImage string` - Image filename to display on the front of the card
+- `BackImage string` - Image filename to display on the back of the card
+- `FrontVideo string` - Video filename to display on the front of the card
+- `BackVideo string` - Video filename to display on the back of the card
 
 #### `TemplateOptions`
 Options for customizing card templates:
@@ -175,8 +241,20 @@ Adds a media file to the deck.
 #### `(*Deck) AddAudio(filename string, data []byte) string`
 Adds an audio file to the deck and returns the Anki sound tag.
 
+#### `(*Deck) AddImage(filename string, data []byte) string`
+Adds an image file to the deck and returns the HTML img tag.
+
+#### `(*Deck) AddVideo(filename string, data []byte) string`
+Adds a video file to the deck and returns the HTML video tag.
+
 #### `(*Deck) AddCardWithAudio(front, back, audioFile string, audioData []byte) error`
 Adds a card with an audio file attached to the back.
+
+#### `(*Deck) AddCardWithImage(front, back, imageFile string, imageData []byte) error`
+Adds a card with an image file attached to the back.
+
+#### `(*Deck) AddCardWithVideo(front, back, videoFile string, videoData []byte) error`
+Adds a card with a video file attached to the back.
 
 #### `(*Deck) Save() ([]byte, error)`
 Exports the deck as .apkg format and returns the data.

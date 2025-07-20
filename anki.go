@@ -36,6 +36,10 @@ type CardOptions struct {
 	Tags       []string
 	FrontAudio string // Audio filename to play on the front of the card
 	BackAudio  string // Audio filename to play on the back of the card
+	FrontImage string // Image filename to display on the front of the card
+	BackImage  string // Image filename to display on the back of the card
+	FrontVideo string // Video filename to display on the front of the card
+	BackVideo  string // Video filename to display on the back of the card
 }
 
 // TemplateOptions allows customization of card templates
@@ -80,13 +84,28 @@ func (d *Deck) AddCard(front, back string) error {
 func (d *Deck) AddCardWithOptions(front, back string, opts *CardOptions) error {
 	now := time.Now().UnixMilli()
 
-	// Handle audio attachments if provided
+	// Handle media attachments if provided
 	if opts != nil {
+		// Audio attachments
 		if opts.FrontAudio != "" {
 			front = front + " " + fmt.Sprintf("[sound:%s]", opts.FrontAudio)
 		}
 		if opts.BackAudio != "" {
 			back = back + " " + fmt.Sprintf("[sound:%s]", opts.BackAudio)
+		}
+		// Image attachments
+		if opts.FrontImage != "" {
+			front = front + " " + fmt.Sprintf(`<img src="%s">`, opts.FrontImage)
+		}
+		if opts.BackImage != "" {
+			back = back + " " + fmt.Sprintf(`<img src="%s">`, opts.BackImage)
+		}
+		// Video attachments
+		if opts.FrontVideo != "" {
+			front = front + " " + fmt.Sprintf(`<video controls><source src="%s"></video>`, opts.FrontVideo)
+		}
+		if opts.BackVideo != "" {
+			back = back + " " + fmt.Sprintf(`<video controls><source src="%s"></video>`, opts.BackVideo)
 		}
 	}
 
@@ -166,11 +185,39 @@ func (d *Deck) AddAudio(filename string, data []byte) string {
 	return fmt.Sprintf("[sound:%s]", filename)
 }
 
+// AddImage adds an image file to the deck and returns the HTML img tag
+func (d *Deck) AddImage(filename string, data []byte) string {
+	d.AddMedia(filename, data)
+	return fmt.Sprintf(`<img src="%s">`, filename)
+}
+
+// AddVideo adds a video file to the deck and returns the HTML video tag
+func (d *Deck) AddVideo(filename string, data []byte) string {
+	d.AddMedia(filename, data)
+	return fmt.Sprintf(`<video controls><source src="%s"></video>`, filename)
+}
+
 // AddCardWithAudio adds a card with an audio file attached to the back
 func (d *Deck) AddCardWithAudio(front, back, audioFile string, audioData []byte) error {
 	d.AddMedia(audioFile, audioData)
 	return d.AddCardWithOptions(front, back, &CardOptions{
 		BackAudio: audioFile,
+	})
+}
+
+// AddCardWithImage adds a card with an image file attached to the back
+func (d *Deck) AddCardWithImage(front, back, imageFile string, imageData []byte) error {
+	d.AddMedia(imageFile, imageData)
+	return d.AddCardWithOptions(front, back, &CardOptions{
+		BackImage: imageFile,
+	})
+}
+
+// AddCardWithVideo adds a card with a video file attached to the back
+func (d *Deck) AddCardWithVideo(front, back, videoFile string, videoData []byte) error {
+	d.AddMedia(videoFile, videoData)
+	return d.AddCardWithOptions(front, back, &CardOptions{
+		BackVideo: videoFile,
 	})
 }
 

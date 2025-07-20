@@ -100,6 +100,83 @@ func main() {
 		}
 	}
 
+	// Image examples
+	// Example 1: Using AddImage helper
+	if imageData, err := os.ReadFile("diagram.png"); err == nil {
+		imgTag := deck.AddImage("diagram.png", imageData)
+		err = deck.AddCard(
+			"What does this diagram show?",
+			"A flowchart "+imgTag,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with image: %v", err)
+		}
+	}
+
+	// Example 2: Using AddCardWithImage convenience method
+	if imageData, err := os.ReadFile("chart.jpg"); err == nil {
+		err = deck.AddCardWithImage(
+			"Analyze this chart",
+			"This shows quarterly revenue growth",
+			"chart.jpg",
+			imageData,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with image: %v", err)
+		}
+	}
+
+	// Video examples
+	// Example 1: Using AddVideo helper
+	if videoData, err := os.ReadFile("demo.mp4"); err == nil {
+		videoTag := deck.AddVideo("demo.mp4", videoData)
+		err = deck.AddCard(
+			"Watch this demonstration",
+			"The video shows how to use the tool "+videoTag,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with video: %v", err)
+		}
+	}
+
+	// Example 2: Using AddCardWithVideo convenience method
+	if videoData, err := os.ReadFile("tutorial.webm"); err == nil {
+		err = deck.AddCardWithVideo(
+			"What technique is demonstrated?",
+			"The proper form for a deadlift",
+			"tutorial.webm",
+			videoData,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with video: %v", err)
+		}
+	}
+
+	// Example 3: Multimedia card with all media types
+	if audioData, err := os.ReadFile("narration.mp3"); err == nil {
+		if imageData, err := os.ReadFile("slide.png"); err == nil {
+			if videoData, err := os.ReadFile("animation.mp4"); err == nil {
+				deck.AddMedia("narration.mp3", audioData)
+				deck.AddMedia("slide.png", imageData)
+				deck.AddMedia("animation.mp4", videoData)
+
+				err = deck.AddCardWithOptions(
+					"Study this multimedia content",
+					"This demonstrates the water cycle",
+					&anki.CardOptions{
+						Tags:       []string{"science", "multimedia"},
+						FrontImage: "slide.png",
+						FrontAudio: "narration.mp3",
+						BackVideo:  "animation.mp4",
+					},
+				)
+				if err != nil {
+					log.Printf("Failed to add multimedia card: %v", err)
+				}
+			}
+		}
+	}
+
 	// Save the deck
 	apkgData, err := deck.Save()
 	if err != nil {
