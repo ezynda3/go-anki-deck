@@ -22,12 +22,7 @@ Releases are automatically created when you push a new tag that follows semantic
 3. **GitHub Actions will automatically:**
    - Run all tests to ensure code quality
    - Generate a changelog from commit messages
-   - Build example binaries for multiple platforms:
-     - Linux (amd64, arm64)
-     - macOS (amd64, arm64)
-     - Windows (amd64)
-   - Create checksums for all binaries
-   - Create a GitHub release with all artifacts
+   - Create a GitHub release with the changelog
 
 ### Version Numbering
 
@@ -52,4 +47,3 @@ If the automatic process fails, you can create a release manually:
 2. Click "Create a new release"
 3. Choose the tag you created
 4. Add release notes
-5. Upload any binary artifacts if needed

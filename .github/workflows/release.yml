@@ -55,32 +55,8 @@ jobs:
         cat changelog.md >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
 
-    - name: Build binaries
-      run: |
-        # Build example binaries for different platforms
-        cd example
-        
-        # Linux
-        GOOS=linux GOARCH=amd64 go build -o ../anki-example-linux-amd64 .
-        GOOS=linux GOARCH=arm64 go build -o ../anki-example-linux-arm64 .
-        
-        # macOS
-        GOOS=darwin GOARCH=amd64 go build -o ../anki-example-darwin-amd64 .
-        GOOS=darwin GOARCH=arm64 go build -o ../anki-example-darwin-arm64 .
-        
-        # Windows
-        GOOS=windows GOARCH=amd64 go build -o ../anki-example-windows-amd64.exe .
-        
-        # Create checksums
-        cd ..
-        sha256sum anki-example-* > checksums.txt
-
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         body_path: changelog.md
-        files: |
-          anki-example-*
-          checksums.txt
-        fail_on_unmatched_files: true
         generate_release_notes: false
