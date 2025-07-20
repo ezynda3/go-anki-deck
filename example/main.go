@@ -265,6 +265,57 @@ func exampleAnkiConnect() {
 		}
 	}
 
+	// Example: Sync with media
+	deckWithMedia, err := anki.NewDeck("Media Example")
+	if err != nil {
+		log.Printf("Failed to create deck: %v", err)
+		return
+	}
+	defer deckWithMedia.Close()
+
+	// Add media and card
+	if audioData, err := os.ReadFile("example.mp3"); err == nil {
+		deckWithMedia.AddMedia("example.mp3", audioData)
+		err = deckWithMedia.AddCard("Listen to this", "Audio example [sound:example.mp3]")
+		if err != nil {
+			log.Printf("Failed to add card: %v", err)
+		}
+
+		// Push with media sync
+		fmt.Println("Pushing deck with media...")
+		if err := deckWithMedia.PushToAnkiWithMedia(ac, true); err != nil {
+			log.Printf("Failed to push deck with media: %v", err)
+		}
+	}
+
+	// Example: Pull from Anki
+	pullDeck, err := anki.NewDeck("Programming Concepts")
+	if err != nil {
+		log.Printf("Failed to create deck: %v", err)
+		return
+	}
+	defer pullDeck.Close()
+
+	fmt.Println("Pulling cards from Anki...")
+	if err := pullDeck.PullFromAnki(ac); err != nil {
+		log.Printf("Failed to pull from Anki: %v", err)
+	} else {
+		fmt.Println("Successfully pulled cards from Anki")
+	}
+
+	// Example: Advanced sync with update detection
+	syncOpts := &anki.SyncOptions{
+		UpdateExisting: true,
+		DeleteMissing:  false,
+		SyncMedia:      true,
+	}
+
+	if err := deck.SyncToAnki(ac, syncOpts); err != nil {
+		log.Printf("Failed to sync: %v", err)
+	} else {
+		fmt.Println("Successfully synced with update detection")
+	}
+
 	// Optional: trigger sync to AnkiWeb
 	if err := ac.Sync(); err != nil {
 		fmt.Println("Note: Failed to sync to AnkiWeb:", err)

@@ -226,12 +226,37 @@ if err != nil {
 ```go
 // Sync with options
 opts := &anki.SyncOptions{
-    UpdateExisting: true,  // Update existing cards
+    UpdateExisting: true,  // Update existing cards instead of skipping
     DeleteMissing: false,  // Don't delete cards not in local deck
-    SyncMedia: true,      // Sync media files (not yet implemented)
+    SyncMedia: true,      // Sync media files (images, audio, video)
 }
 
 err := deck.SyncToAnki(ac, opts)
+```
+
+#### Media Sync
+
+```go
+// Push deck with media files
+err := deck.PushToAnkiWithMedia(ac, true)
+
+// Media files are automatically detected from card content
+// Supported formats:
+// - Audio: [sound:filename.mp3]
+// - Images: <img src="filename.png">
+// - Videos: <video src="filename.mp4">
+```
+
+#### Bidirectional Sync
+
+```go
+// Pull cards from Anki to local deck
+err := deck.PullFromAnki(ac)
+
+// This will:
+// 1. Find all cards in the Anki deck
+// 2. Clear local cards
+// 3. Import cards from Anki with their tags
 ```
 
 #### AnkiConnect Operations
@@ -376,6 +401,18 @@ Deletes a deck and all its cards.
 
 #### `(*AnkiConnect) Sync() error`
 Triggers Anki to sync with AnkiWeb.
+
+#### `(*AnkiConnect) StoreMediaFile(filename string, data []byte) error`
+Stores a media file in Anki's media folder with base64 encoding.
+
+#### `(*AnkiConnect) GetNotesInfo(noteIDs []int64) ([]map[string]interface{}, error)`
+Retrieves detailed information about notes.
+
+#### `(*Deck) PushToAnkiWithMedia(client *AnkiConnect, syncMedia bool) error`
+Pushes the deck to Anki with optional media sync.
+
+#### `(*Deck) PullFromAnki(client *AnkiConnect) error`
+Pulls cards from Anki deck and updates the local deck.
 
 ## License
 
