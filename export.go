@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -123,18 +122,6 @@ func (d *Deck) copyTableData(srcDB, destDB *sql.DB, tableName string) error {
 	}
 
 	return rows.Err()
-}
-
-// Alternative export method using SQLite CLI if available
-func (d *Deck) exportDatabaseCLI(w *bytes.Buffer) error {
-	// Check if sqlite3 CLI is available
-	if _, err := exec.LookPath("sqlite3"); err != nil {
-		return d.exportDatabase(w) // Fall back to manual method
-	}
-
-	// For in-memory databases, we can't easily use the CLI
-	// so we'll use the manual method
-	return d.exportDatabase(w)
 }
 
 // SaveToFile saves the deck directly to a file

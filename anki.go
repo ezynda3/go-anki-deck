@@ -64,7 +64,7 @@ func NewDeckWithTemplate(name string, templateOpts *TemplateOptions) (*Deck, err
 	}
 
 	if err := deck.initializeDatabase(templateOpts); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 

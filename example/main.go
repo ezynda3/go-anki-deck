@@ -121,7 +121,10 @@ func main() {
 	}
 	defer deck2.Close()
 
-	deck2.AddCard("Hello", "World")
+	err = deck2.AddCard("Hello", "World")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = deck2.SaveToFile("another.apkg")
 	if err != nil {
@@ -129,36 +132,4 @@ func main() {
 	}
 
 	fmt.Println("Second deck exported successfully to another.apkg")
-}
-
-// Example with custom template
-func exampleWithCustomTemplate() {
-	deck, err := anki.NewDeckWithTemplate("Custom Template Deck", &anki.TemplateOptions{
-		QuestionFormat: `<div class="question">{{Front}}</div>`,
-		AnswerFormat: `{{FrontSide}}
-<hr id="answer">
-<div class="answer">{{Back}}</div>`,
-		CSS: `.card {
-	font-family: Georgia, serif;
-	font-size: 24px;
-	text-align: center;
-	color: #333;
-	background-color: #f5f5f5;
-}
-.question {
-	color: blue;
-	font-weight: bold;
-}
-.answer {
-	color: green;
-	margin-top: 20px;
-}`,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer deck.Close()
-
-	deck.AddCard("Custom styled question", "Custom styled answer")
-	deck.SaveToFile("custom_template.apkg")
 }

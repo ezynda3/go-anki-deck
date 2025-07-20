@@ -379,10 +379,13 @@ func BenchmarkAddCard(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		deck.AddCard(
+		err := deck.AddCard(
 			fmt.Sprintf("Question %d", i),
 			fmt.Sprintf("Answer %d", i),
 		)
+		if err != nil {
+			b.Fatalf("Failed to add card: %v", err)
+		}
 	}
 }
 
@@ -395,10 +398,13 @@ func BenchmarkSave(b *testing.B) {
 
 	// Add some cards
 	for i := 0; i < 100; i++ {
-		deck.AddCard(
+		err := deck.AddCard(
 			fmt.Sprintf("Question %d", i),
 			fmt.Sprintf("Answer %d", i),
 		)
+		if err != nil {
+			b.Fatalf("Failed to add card: %v", err)
+		}
 	}
 
 	b.ResetTimer()
