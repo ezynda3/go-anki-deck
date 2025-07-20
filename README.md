@@ -189,6 +189,78 @@ deck, err := anki.NewDeckWithTemplate("Custom Deck", &anki.TemplateOptions{
 })
 ```
 
+### AnkiConnect Integration
+
+This package supports syncing decks directly to Anki desktop using the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) addon.
+
+#### Prerequisites
+
+1. Install [Anki](https://apps.ankiweb.net/) desktop application
+2. Install the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) addon in Anki
+3. Ensure Anki is running when using sync features
+
+#### Basic Usage
+
+```go
+// Create and populate a deck
+deck, err := anki.NewDeck("My Deck")
+if err != nil {
+    log.Fatal(err)
+}
+defer deck.Close()
+
+deck.AddCard("Question", "Answer")
+
+// Create AnkiConnect client
+ac := anki.NewAnkiConnect()
+
+// Push deck to Anki
+err = deck.PushToAnki(ac)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+#### Advanced Sync Options
+
+```go
+// Sync with options
+opts := &anki.SyncOptions{
+    UpdateExisting: true,  // Update existing cards
+    DeleteMissing: false,  // Don't delete cards not in local deck
+    SyncMedia: true,      // Sync media files (not yet implemented)
+}
+
+err := deck.SyncToAnki(ac, opts)
+```
+
+#### AnkiConnect Operations
+
+```go
+// Check connection
+err := ac.Ping()
+
+// Get all deck names
+decks, err := ac.GetDeckNames()
+
+// Create a deck directly
+err := ac.CreateDeck("New Deck")
+
+// Delete a deck
+err := ac.DeleteDeck("Old Deck")
+
+// Trigger sync to AnkiWeb
+err := ac.Sync()
+```
+
+#### Custom AnkiConnect URL
+
+If AnkiConnect is running on a different port or host:
+
+```go
+ac := anki.NewAnkiConnectWithURL("http://localhost:8765")
+```
+
 ## Features
 
 - Create Anki decks programmatically
@@ -220,6 +292,17 @@ Options for customizing card templates:
 - `QuestionFormat string` - HTML template for the question side
 - `AnswerFormat string` - HTML template for the answer side
 - `CSS string` - CSS styles for the cards
+
+#### `AnkiConnect`
+Client for communicating with AnkiConnect addon:
+- `URL string` - AnkiConnect server URL (default: http://localhost:8765)
+- `Version int` - AnkiConnect API version (default: 6)
+
+#### `SyncOptions`
+Options for deck synchronization:
+- `UpdateExisting bool` - Update existing cards
+- `DeleteMissing bool` - Delete cards not in local deck
+- `SyncMedia bool` - Sync media files
 
 ### Functions
 
@@ -264,6 +347,35 @@ Exports the deck directly to a file.
 
 #### `(*Deck) Close() error`
 Closes the deck and releases resources.
+
+#### `(*Deck) PushToAnki(client *AnkiConnect) error`
+Pushes the entire deck to Anki, creating it if necessary.
+
+#### `(*Deck) SyncToAnki(client *AnkiConnect, opts *SyncOptions) error`
+Performs a more sophisticated sync with options.
+
+### AnkiConnect Functions
+
+#### `NewAnkiConnect() *AnkiConnect`
+Creates a new AnkiConnect client with default settings.
+
+#### `NewAnkiConnectWithURL(url string) *AnkiConnect`
+Creates a new AnkiConnect client with custom URL.
+
+#### `(*AnkiConnect) Ping() error`
+Checks if AnkiConnect is available.
+
+#### `(*AnkiConnect) GetDeckNames() ([]string, error)`
+Returns all deck names in Anki.
+
+#### `(*AnkiConnect) CreateDeck(name string) error`
+Creates a new deck in Anki.
+
+#### `(*AnkiConnect) DeleteDeck(name string) error`
+Deletes a deck and all its cards.
+
+#### `(*AnkiConnect) Sync() error`
+Triggers Anki to sync with AnkiWeb.
 
 ## License
 

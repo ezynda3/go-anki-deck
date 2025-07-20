@@ -209,4 +209,64 @@ func main() {
 	}
 
 	fmt.Println("Second deck exported successfully to another.apkg")
+
+	// AnkiConnect example
+	exampleAnkiConnect()
+}
+
+func exampleAnkiConnect() {
+	// Create a deck
+	deck, err := anki.NewDeck("Programming Concepts")
+	if err != nil {
+		log.Printf("Failed to create deck: %v", err)
+		return
+	}
+	defer deck.Close()
+
+	// Add some cards
+	err = deck.AddCard("What is a variable?", "A named storage location in memory")
+	if err != nil {
+		log.Printf("Failed to add card: %v", err)
+		return
+	}
+
+	err = deck.AddCard("What is a function?", "A reusable block of code")
+	if err != nil {
+		log.Printf("Failed to add card: %v", err)
+		return
+	}
+
+	// Create AnkiConnect client
+	ac := anki.NewAnkiConnect()
+
+	// Check if Anki is running
+	if err := ac.Ping(); err != nil {
+		fmt.Printf("AnkiConnect example skipped: Anki is not running or AnkiConnect addon is not installed: %v\n", err)
+		return
+	}
+
+	// Push deck to Anki
+	fmt.Println("Pushing deck to Anki...")
+	if err := deck.PushToAnki(ac); err != nil {
+		log.Printf("Failed to push deck: %v", err)
+		return
+	}
+
+	fmt.Println("Deck successfully pushed to Anki!")
+
+	// List all decks
+	decks, err := ac.GetDeckNames()
+	if err != nil {
+		log.Printf("Failed to get deck names: %v", err)
+	} else {
+		fmt.Println("Available decks in Anki:")
+		for _, deckName := range decks {
+			fmt.Printf("  - %s\n", deckName)
+		}
+	}
+
+	// Optional: trigger sync to AnkiWeb
+	if err := ac.Sync(); err != nil {
+		fmt.Println("Note: Failed to sync to AnkiWeb:", err)
+	}
 }
