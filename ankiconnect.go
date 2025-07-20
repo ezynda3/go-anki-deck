@@ -566,8 +566,9 @@ func extractMediaReferences(front, back string, mediaType string) []ankiMedia {
 // SyncToAnki performs a more sophisticated sync with options
 func (d *Deck) SyncToAnki(client *AnkiConnect, opts *SyncOptions) error {
 	// Use default options if none provided
-	if opts == nil {
-		opts = &SyncOptions{
+	syncOpts := opts
+	if syncOpts == nil {
+		syncOpts = &SyncOptions{
 			UpdateExisting: true,
 			DeleteMissing:  false,
 			SyncMedia:      false,
@@ -594,7 +595,7 @@ func (d *Deck) SyncToAnki(client *AnkiConnect, opts *SyncOptions) error {
 	}
 
 	// If UpdateExisting is true and there are existing notes, update them
-	if opts.UpdateExisting && len(existingNotes) > 0 {
+	if syncOpts.UpdateExisting && len(existingNotes) > 0 {
 		// Get detailed info about existing notes
 		notesInfo, err := client.GetNotesInfo(existingNotes)
 		if err != nil {
@@ -624,9 +625,9 @@ func (d *Deck) SyncToAnki(client *AnkiConnect, opts *SyncOptions) error {
 		}
 
 		// Update existing notes and add new ones
-		return d.syncWithExisting(client, existingMap, opts.SyncMedia)
+		return d.syncWithExisting(client, existingMap, syncOpts.SyncMedia)
 	}
 
 	// No existing notes, just push all cards
-	return d.PushToAnkiWithMedia(client, opts.SyncMedia)
+	return d.PushToAnkiWithMedia(client, syncOpts.SyncMedia)
 }
