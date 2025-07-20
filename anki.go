@@ -33,7 +33,9 @@ type Media struct {
 
 // CardOptions represents optional parameters for adding cards
 type CardOptions struct {
-	Tags []string
+	Tags       []string
+	FrontAudio string // Audio filename to play on the front of the card
+	BackAudio  string // Audio filename to play on the back of the card
 }
 
 // TemplateOptions allows customization of card templates
@@ -77,6 +79,17 @@ func (d *Deck) AddCard(front, back string) error {
 // AddCardWithOptions adds a new card with optional parameters
 func (d *Deck) AddCardWithOptions(front, back string, opts *CardOptions) error {
 	now := time.Now().UnixMilli()
+
+	// Handle audio attachments if provided
+	if opts != nil {
+		if opts.FrontAudio != "" {
+			front = front + " " + fmt.Sprintf("[sound:%s]", opts.FrontAudio)
+		}
+		if opts.BackAudio != "" {
+			back = back + " " + fmt.Sprintf("[sound:%s]", opts.BackAudio)
+		}
+	}
+
 	noteGUID := d.getNoteGUID(d.topDeckID, front, back)
 	noteID := d.getNoteID(noteGUID, now)
 
@@ -144,6 +157,20 @@ func (d *Deck) AddMedia(filename string, data []byte) {
 	d.media = append(d.media, Media{
 		Filename: filename,
 		Data:     data,
+	})
+}
+
+// AddAudio adds an audio file to the deck and returns the Anki sound tag
+func (d *Deck) AddAudio(filename string, data []byte) string {
+	d.AddMedia(filename, data)
+	return fmt.Sprintf("[sound:%s]", filename)
+}
+
+// AddCardWithAudio adds a card with an audio file attached to the back
+func (d *Deck) AddCardWithAudio(front, back, audioFile string, audioData []byte) error {
+	d.AddMedia(audioFile, audioData)
+	return d.AddCardWithOptions(front, back, &CardOptions{
+		BackAudio: audioFile,
 	})
 }
 

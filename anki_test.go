@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -255,6 +256,117 @@ func TestDuplicateCard(t *testing.T) {
 	}
 	if noteCount != 1 {
 		t.Errorf("Expected 1 unique note, got %d", noteCount)
+	}
+}
+
+func TestAddAudio(t *testing.T) {
+	deck, err := NewDeck("Audio Test Deck")
+	if err != nil {
+		t.Fatalf("Failed to create deck: %v", err)
+	}
+	defer deck.Close()
+
+	// Test AddAudio helper
+	audioData := []byte("fake audio data")
+	soundTag := deck.AddAudio("test.mp3", audioData)
+	if soundTag != "[sound:test.mp3]" {
+		t.Errorf("Expected '[sound:test.mp3]', got '%s'", soundTag)
+	}
+
+	// Verify media was added
+	if len(deck.media) != 1 {
+		t.Errorf("Expected 1 media file, got %d", len(deck.media))
+	}
+	if deck.media[0].Filename != "test.mp3" {
+		t.Errorf("Expected filename 'test.mp3', got '%s'", deck.media[0].Filename)
+	}
+}
+
+func TestAddCardWithAudio(t *testing.T) {
+	deck, err := NewDeck("Audio Card Test Deck")
+	if err != nil {
+		t.Fatalf("Failed to create deck: %v", err)
+	}
+	defer deck.Close()
+
+	// Test AddCardWithAudio
+	audioData := []byte("fake audio data")
+	err = deck.AddCardWithAudio("What sound is this?", "A test sound", "test.mp3", audioData)
+	if err != nil {
+		t.Errorf("Failed to add card with audio: %v", err)
+	}
+
+	// Verify media was added
+	if len(deck.media) != 1 {
+		t.Errorf("Expected 1 media file, got %d", len(deck.media))
+	}
+
+	// Verify card was created with audio tag
+	var flds string
+	err = deck.db.QueryRow("SELECT flds FROM notes").Scan(&flds)
+	if err != nil {
+		t.Fatalf("Failed to query note fields: %v", err)
+	}
+
+	if !strings.Contains(flds, "[sound:test.mp3]") {
+		t.Errorf("Expected fields to contain '[sound:test.mp3]', got '%s'", flds)
+	}
+}
+
+func TestAddCardWithOptions_Audio(t *testing.T) {
+	deck, err := NewDeck("Audio Options Test Deck")
+	if err != nil {
+		t.Fatalf("Failed to create deck: %v", err)
+	}
+	defer deck.Close()
+
+	// Add audio files first
+	frontAudio := []byte("front audio data")
+	backAudio := []byte("back audio data")
+	deck.AddMedia("front.mp3", frontAudio)
+	deck.AddMedia("back.mp3", backAudio)
+
+	// Add card with audio options
+	err = deck.AddCardWithOptions(
+		"Question",
+		"Answer",
+		&CardOptions{
+			Tags:       []string{"audio", "test"},
+			FrontAudio: "front.mp3",
+			BackAudio:  "back.mp3",
+		},
+	)
+	if err != nil {
+		t.Errorf("Failed to add card with audio options: %v", err)
+	}
+
+	// Verify card fields contain audio tags
+	var flds string
+	err = deck.db.QueryRow("SELECT flds FROM notes").Scan(&flds)
+	if err != nil {
+		t.Fatalf("Failed to query note fields: %v", err)
+	}
+
+	parts := strings.Split(flds, separator)
+	if len(parts) != 2 {
+		t.Fatalf("Expected 2 fields, got %d", len(parts))
+	}
+
+	if !strings.Contains(parts[0], "[sound:front.mp3]") {
+		t.Errorf("Expected front to contain '[sound:front.mp3]', got '%s'", parts[0])
+	}
+	if !strings.Contains(parts[1], "[sound:back.mp3]") {
+		t.Errorf("Expected back to contain '[sound:back.mp3]', got '%s'", parts[1])
+	}
+
+	// Verify tags
+	var tags string
+	err = deck.db.QueryRow("SELECT tags FROM notes").Scan(&tags)
+	if err != nil {
+		t.Fatalf("Failed to query tags: %v", err)
+	}
+	if !strings.Contains(tags, "audio") || !strings.Contains(tags, "test") {
+		t.Errorf("Expected tags to contain 'audio' and 'test', got '%s'", tags)
 	}
 }
 

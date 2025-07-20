@@ -53,6 +53,53 @@ func main() {
 		}
 	}
 
+	// Audio examples
+	// Example 1: Using AddAudio helper
+	if audioData, err := os.ReadFile("pronunciation.mp3"); err == nil {
+		soundTag := deck.AddAudio("pronunciation.mp3", audioData)
+		err = deck.AddCard(
+			"How do you pronounce 'hello'?",
+			"Hello "+soundTag,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with audio: %v", err)
+		}
+	}
+
+	// Example 2: Using AddCardWithAudio convenience method
+	if audioData, err := os.ReadFile("word.mp3"); err == nil {
+		err = deck.AddCardWithAudio(
+			"What word is this?",
+			"Example",
+			"word.mp3",
+			audioData,
+		)
+		if err != nil {
+			log.Printf("Failed to add card with audio: %v", err)
+		}
+	}
+
+	// Example 3: Using CardOptions with audio on both sides
+	if frontAudio, err := os.ReadFile("question.mp3"); err == nil {
+		if backAudio, err := os.ReadFile("answer.mp3"); err == nil {
+			deck.AddMedia("question.mp3", frontAudio)
+			deck.AddMedia("answer.mp3", backAudio)
+
+			err = deck.AddCardWithOptions(
+				"Listen to the question",
+				"Here's the answer",
+				&anki.CardOptions{
+					Tags:       []string{"audio", "example"},
+					FrontAudio: "question.mp3",
+					BackAudio:  "answer.mp3",
+				},
+			)
+			if err != nil {
+				log.Printf("Failed to add card with audio options: %v", err)
+			}
+		}
+	}
+
 	// Save the deck
 	apkgData, err := deck.Save()
 	if err != nil {

@@ -68,6 +68,39 @@ deck.AddCard(
 )
 ```
 
+### Adding Audio
+
+```go
+// Method 1: Using AddAudio helper
+audioData, err := os.ReadFile("pronunciation.mp3")
+if err != nil {
+    log.Fatal(err)
+}
+soundTag := deck.AddAudio("pronunciation.mp3", audioData)
+deck.AddCard("How do you pronounce 'hello'?", "Hello " + soundTag)
+
+// Method 2: Using AddCardWithAudio convenience method
+deck.AddCardWithAudio(
+    "What sound is this?",
+    "A bell ringing",
+    "bell.mp3",
+    audioData,
+)
+
+// Method 3: Using CardOptions for audio on both sides
+deck.AddMedia("question.mp3", questionAudio)
+deck.AddMedia("answer.mp3", answerAudio)
+deck.AddCardWithOptions(
+    "Listen to the question",
+    "Here's the answer",
+    &anki.CardOptions{
+        Tags:       []string{"audio", "listening"},
+        FrontAudio: "question.mp3",
+        BackAudio:  "answer.mp3",
+    },
+)
+```
+
 ### Custom Templates
 
 ```go
@@ -113,6 +146,8 @@ The main type representing an Anki deck.
 #### `CardOptions`
 Options for adding cards:
 - `Tags []string` - Tags to associate with the card
+- `FrontAudio string` - Audio filename to play on the front of the card
+- `BackAudio string` - Audio filename to play on the back of the card
 
 #### `TemplateOptions`
 Options for customizing card templates:
@@ -136,6 +171,12 @@ Adds a card with additional options like tags.
 
 #### `(*Deck) AddMedia(filename string, data []byte)`
 Adds a media file to the deck.
+
+#### `(*Deck) AddAudio(filename string, data []byte) string`
+Adds an audio file to the deck and returns the Anki sound tag.
+
+#### `(*Deck) AddCardWithAudio(front, back, audioFile string, audioData []byte) error`
+Adds a card with an audio file attached to the back.
 
 #### `(*Deck) Save() ([]byte, error)`
 Exports the deck as .apkg format and returns the data.
